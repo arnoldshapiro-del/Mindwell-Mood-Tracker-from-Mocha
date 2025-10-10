@@ -98,6 +98,46 @@ class MindwellDB {
     });
   }
 
+  async seedActivities(): Promise<void> {
+    if (!this.db) await this.init();
+    
+    const tx = this.db!.transaction('activities', 'readwrite');
+    const store = tx.objectStore('activities');
+    
+    // Check if activities already exist
+    const count = await new Promise<number>((resolve) => {
+      const countRequest = store.count();
+      countRequest.onsuccess = () => resolve(countRequest.result);
+    });
+
+    if (count === 0) {
+      // Seed default activities
+      const defaultActivities = [
+        { id: 1, name: 'Exercise', icon: '💪', color: '#10b981', category: 'fitness' },
+        { id: 2, name: 'Meditation', icon: '🧘', color: '#8b5cf6', category: 'wellness' },
+        { id: 3, name: 'Reading', icon: '📚', color: '#3b82f6', category: 'entertainment' },
+        { id: 4, name: 'Socializing', icon: '👥', color: '#ec4899', category: 'social' },
+        { id: 5, name: 'Work', icon: '💼', color: '#6366f1', category: 'productivity' },
+        { id: 6, name: 'Sleep', icon: '😴', color: '#06b6d4', category: 'health' },
+        { id: 7, name: 'Therapy', icon: '🗣️', color: '#14b8a6', category: 'health' },
+        { id: 8, name: 'Cooking', icon: '🍳', color: '#f59e0b', category: 'wellness' },
+      ];
+      
+      for (const activity of defaultActivities) {
+        store.add({
+          ...activity,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      }
+    }
+
+    return new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   // Mood Entries CRUD
   async getAllMoodEntries(): Promise<any[]> {
     if (!this.db) await this.init();
