@@ -273,11 +273,12 @@ class MindwellDB {
     return new Promise((resolve, reject) => {
       const tx = this.db!.transaction('medications', 'readonly');
       const store = tx.objectStore('medications');
-      const index = store.index('is_active');
-      const request = index.getAll(true);
+      const request = store.getAll();
       
       request.onsuccess = () => {
-        const meds = request.result.sort((a, b) => a.name.localeCompare(b.name));
+        const meds = request.result
+          .filter((med: any) => med.is_active === true)
+          .sort((a: any, b: any) => a.name.localeCompare(b.name));
         resolve(meds);
       };
       request.onerror = () => reject(request.error);
