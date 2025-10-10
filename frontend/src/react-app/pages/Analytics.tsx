@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { TrendingUp, Calendar, Activity, AlertCircle, BarChart3, PieChart, Sun, CloudSun, Moon } from 'lucide-react';
 import AdvancedChart from '@/react-app/components/AdvancedChart';
 import { useMoodEntries } from '@/react-app/hooks/useMoodEntries';
+import { db } from '@/utils/db';
 
 interface AnalyticsData {
   daily: any[];
@@ -27,50 +28,27 @@ export default function Analytics() {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const [trendsResponse, weeklyResponse, monthlyResponse, timePatternsResponse] = await Promise.all([
-          fetch('/api/analytics/trends'),
-          fetch('/api/analytics/weekly'),
-          fetch('/api/analytics/monthly'),
-          fetch('/api/analytics/time-patterns')
-        ]);
-
-        if (!trendsResponse.ok || !weeklyResponse.ok || !monthlyResponse.ok || !timePatternsResponse.ok) {
-          throw new Error('Failed to fetch analytics data');
-        }
-
+        
+        // Fetch from IndexedDB
         const [trends, weekly, monthly, timePatterns] = await Promise.all([
-          trendsResponse.json(),
-          weeklyResponse.json(),
-          monthlyResponse.json(),
-          timePatternsResponse.json()
+          db.getTrends(30),
+          db.getWeeklyTrends(12),
+          db.getMonthlyTrends(12),
+          db.getTimePatterns(30)
         ]);
 
         // Process daily data
-        const dailyData = trends.reduce((acc: any[], trend: any) => {
-          const date = trend.entry_date;
-          const existing = acc.find(item => item.date === date);
-          
-          if (existing) {
-            // Average multiple entries per day
-            existing.avg_mood = (existing.avg_mood + trend.avg_mood) / 2;
-            existing.avg_anxiety = (existing.avg_anxiety + (5 - trend.avg_anxiety)) / 2; // Invert anxiety
-            existing.avg_energy = (existing.avg_energy + trend.avg_energy) / 2;
-            existing.avg_sleep = (existing.avg_sleep + trend.avg_sleep) / 2;
-          } else {
-            acc.push({
-              date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-              avg_mood: Number(trend.avg_mood.toFixed(1)),
-              avg_anxiety: Number((5 - trend.avg_anxiety).toFixed(1)), // Invert anxiety
-              avg_energy: Number(trend.avg_energy.toFixed(1)),
-              avg_sleep: Number(trend.avg_sleep.toFixed(1)),
-            });
-          }
-          return acc;
-        }, []);
+        const dailyData = trends.map((trend: any) => ({
+          date: new Date(trend.entry_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          avg_mood: Number(trend.avg_mood.toFixed(1)),
+          avg_anxiety: Number((5 - trend.avg_anxiety).toFixed(1)), // Invert anxiety
+          avg_energy: Number(trend.avg_energy.toFixed(1)),
+          avg_sleep: Number(trend.avg_sleep.toFixed(1)),
+        }));
 
         // Process weekly data
         const weeklyData = weekly.map((week: any) => ({
-          date: `Week ${week.week.split('-')[1]}`,
+          date: `Week ${week.week.split('-W')[1]}`,
           avg_mood: Number(week.avg_mood.toFixed(1)),
           avg_anxiety: Number((5 - week.avg_anxiety).toFixed(1)),
           avg_energy: Number(week.avg_energy.toFixed(1)),
