@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { db } from '@/utils/db';
 
 interface TrendData {
   entry_date: string;
@@ -8,18 +9,29 @@ interface TrendData {
   avg_sleep: number;
 }
 
+interface EmotionAnalytics {
+  name: string;
+  category: string;
+  color: string;
+  avg_intensity: number;
+  frequency: number;
+}
+
 export function useAnalytics() {
   const [trends, setTrends] = useState<TrendData[]>([]);
+  const [emotionAnalytics, setEmotionAnalytics] = useState<EmotionAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTrends = async () => {
+  const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/analytics/trends');
-      if (!response.ok) throw new Error('Failed to fetch trends');
-      const data = await response.json();
-      setTrends(data);
+      const [trendsData, emotionsData] = await Promise.all([
+        db.getTrends(30),
+        db.getEmotionAnalytics(30),
+      ]);
+      setTrends(trendsData);
+      setEmotionAnalytics(emotionsData);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -29,13 +41,14 @@ export function useAnalytics() {
   };
 
   useEffect(() => {
-    fetchTrends();
+    fetchAnalytics();
   }, []);
 
   return {
     trends,
+    emotionAnalytics,
     loading,
     error,
-    refresh: fetchTrends,
+    refresh: fetchAnalytics,
   };
 }

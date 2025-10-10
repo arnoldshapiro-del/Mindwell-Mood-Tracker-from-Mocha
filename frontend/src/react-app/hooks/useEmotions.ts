@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { db } from '@/utils/db';
 
 interface Emotion {
   id: number;
@@ -15,9 +16,7 @@ export function useEmotions() {
   const fetchEmotions = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/emotions');
-      if (!response.ok) throw new Error('Failed to fetch emotions');
-      const data = await response.json();
+      const data = await db.getAllEmotions();
       setEmotions(data);
       setError(null);
     } catch (err) {

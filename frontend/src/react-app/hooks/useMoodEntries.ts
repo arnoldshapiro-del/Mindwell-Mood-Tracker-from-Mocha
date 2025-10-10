@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MoodEntry, CreateMoodEntrySchema } from '@/shared/types';
+import { db } from '@/utils/db';
 
 export function useMoodEntries() {
   const [entries, setEntries] = useState<MoodEntry[]>([]);
@@ -9,9 +10,7 @@ export function useMoodEntries() {
   const fetchEntries = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/mood-entries');
-      if (!response.ok) throw new Error('Failed to fetch entries');
-      const data = await response.json();
+      const data = await db.getAllMoodEntries();
       setEntries(data);
       setError(null);
     } catch (err) {
@@ -24,13 +23,7 @@ export function useMoodEntries() {
   const createEntry = async (entryData: any) => {
     try {
       const validatedData = CreateMoodEntrySchema.parse(entryData);
-      const response = await fetch('/api/mood-entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData),
-      });
-      if (!response.ok) throw new Error('Failed to create entry');
-      const newEntry = await response.json();
+      const newEntry = await db.createMoodEntry(validatedData);
       setEntries(prev => [newEntry, ...prev]);
       return newEntry;
     } catch (err) {
@@ -41,13 +34,7 @@ export function useMoodEntries() {
   const updateEntry = async (id: number, entryData: any) => {
     try {
       const validatedData = CreateMoodEntrySchema.parse(entryData);
-      const response = await fetch(`/api/mood-entries/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData),
-      });
-      if (!response.ok) throw new Error('Failed to update entry');
-      const updatedEntry = await response.json();
+      const updatedEntry = await db.updateMoodEntry(id, validatedData);
       setEntries(prev => prev.map(entry => entry.id === id ? updatedEntry : entry));
       return updatedEntry;
     } catch (err) {
@@ -57,10 +44,7 @@ export function useMoodEntries() {
 
   const deleteEntry = async (id: number) => {
     try {
-      const response = await fetch(`/api/mood-entries/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Failed to delete entry');
+      await db.deleteMoodEntry(id);
       setEntries(prev => prev.filter(entry => entry.id !== id));
     } catch (err) {
       throw err instanceof Error ? err : new Error('Unknown error');
