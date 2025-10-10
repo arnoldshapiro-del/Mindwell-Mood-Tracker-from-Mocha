@@ -158,7 +158,7 @@ export default function EmotionAnalytics() {
                   cy="50%"
                   outerRadius={80}
                   dataKey="count"
-                  label={({ category }: { category: string }) => category}
+                  label
                 >
                   {categoryData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
