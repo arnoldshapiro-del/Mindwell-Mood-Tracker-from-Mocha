@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Heart, Frown, Meh } from 'lucide-react';
+import { useEmotions } from '@/react-app/hooks/useEmotions';
 
 interface Emotion {
   id: number;
@@ -18,27 +19,8 @@ interface EmotionSelectorProps {
 }
 
 export default function EmotionSelector({ selectedEmotions, onChange }: EmotionSelectorProps) {
-  const [emotions, setEmotions] = useState<Emotion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { emotions, loading } = useEmotions();
   const [activeCategory, setActiveCategory] = useState<string>('all');
-
-  useEffect(() => {
-    const fetchEmotions = async () => {
-      try {
-        const response = await fetch('/api/emotions');
-        if (response.ok) {
-          const data = await response.json();
-          setEmotions(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch emotions:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEmotions();
-  }, []);
 
   const categories = [
     { id: 'all', name: 'All', icon: Heart },
