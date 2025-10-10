@@ -434,6 +434,131 @@ class MindwellDB {
     })).sort((a, b) => a.entry_date.localeCompare(b.entry_date));
   }
 
+  async getWeeklyTrends(weeks: number = 12): Promise<any[]> {
+    if (!this.db) await this.init();
+    
+    const entries = await this.getAllMoodEntries();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - (weeks * 7));
+    
+    const filtered = entries.filter(e => new Date(e.entry_date) >= cutoffDate);
+    
+    // Group by week
+    const grouped = filtered.reduce((acc, entry) => {
+      const date = new Date(entry.entry_date);
+      const weekNum = this.getWeekNumber(date);
+      const weekKey = `${date.getFullYear()}-W${weekNum.toString().padStart(2, '0')}`;
+      
+      if (!acc[weekKey]) {
+        acc[weekKey] = { week: weekKey, moods: [], anxieties: [], energies: [], sleeps: [] };
+      }
+      acc[weekKey].moods.push(entry.mood_level);
+      acc[weekKey].anxieties.push(entry.anxiety_level);
+      acc[weekKey].energies.push(entry.energy_level);
+      acc[weekKey].sleeps.push(entry.sleep_quality);
+      return acc;
+    }, {} as any);
+
+    return Object.values(grouped).map((g: any) => ({
+      week: g.week,
+      avg_mood: g.moods.reduce((a: number, b: number) => a + b, 0) / g.moods.length,
+      avg_anxiety: g.anxieties.reduce((a: number, b: number) => a + b, 0) / g.anxieties.length,
+      avg_energy: g.energies.reduce((a: number, b: number) => a + b, 0) / g.energies.length,
+      avg_sleep: g.sleeps.reduce((a: number, b: number) => a + b, 0) / g.sleeps.length,
+    })).sort((a, b) => a.week.localeCompare(b.week));
+  }
+
+  async getMonthlyTrends(months: number = 12): Promise<any[]> {
+    if (!this.db) await this.init();
+    
+    const entries = await this.getAllMoodEntries();
+    const cutoffDate = new Date();
+    cutoffDate.setMonth(cutoffDate.getMonth() - months);
+    
+    const filtered = entries.filter(e => new Date(e.entry_date) >= cutoffDate);
+    
+    // Group by month
+    const grouped = filtered.reduce((acc, entry) => {
+      const date = new Date(entry.entry_date);
+      const monthKey = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = { month: monthKey, moods: [], anxieties: [], energies: [], sleeps: [] };
+      }
+      acc[monthKey].moods.push(entry.mood_level);
+      acc[monthKey].anxieties.push(entry.anxiety_level);
+      acc[monthKey].energies.push(entry.energy_level);
+      acc[monthKey].sleeps.push(entry.sleep_quality);
+      return acc;
+    }, {} as any);
+
+    return Object.values(grouped).map((g: any) => ({
+      month: g.month,
+      avg_mood: g.moods.reduce((a: number, b: number) => a + b, 0) / g.moods.length,
+      avg_anxiety: g.anxieties.reduce((a: number, b: number) => a + b, 0) / g.anxieties.length,
+      avg_energy: g.energies.reduce((a: number, b: number) => a + b, 0) / g.energies.length,
+      avg_sleep: g.sleeps.reduce((a: number, b: number) => a + b, 0) / g.sleeps.length,
+    })).sort((a, b) => a.month.localeCompare(b.month));
+  }
+
+  async getTimePatterns(days: number = 30): Promise<any[]> {
+    if (!this.db) await this.init();
+    
+    const entries = await this.getAllMoodEntries();
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    const filtered = entries.filter(e => 
+      new Date(e.entry_date) >= cutoffDate && e.time_of_day
+    );
+    
+    // Group by time of day
+    const grouped = filtered.reduce((acc, entry) => {
+      const timeOfDay = entry.time_of_day || 'unknown';
+      
+      if (!acc[timeOfDay]) {
+        acc[timeOfDay] = { 
+          time_of_day: timeOfDay, 
+          moods: [], 
+          anxieties: [], 
+          energies: [], 
+          sleeps: [],
+          count: 0
+        };
+      }
+      acc[timeOfDay].moods.push(entry.mood_level);
+      acc[timeOfDay].anxieties.push(entry.anxiety_level);
+      acc[timeOfDay].energies.push(entry.energy_level);
+      acc[timeOfDay].sleeps.push(entry.sleep_quality);
+      acc[timeOfDay].count++;
+      return acc;
+    }, {} as any);
+
+    const timeOrder = ['morning', 'afternoon', 'evening'];
+    return Object.values(grouped)
+      .map((g: any) => ({
+        time_of_day: g.time_of_day,
+        avg_mood: g.moods.reduce((a: number, b: number) => a + b, 0) / g.moods.length,
+        avg_anxiety: g.anxieties.reduce((a: number, b: number) => a + b, 0) / g.anxieties.length,
+        avg_energy: g.energies.reduce((a: number, b: number) => a + b, 0) / g.energies.length,
+        avg_sleep: g.sleeps.reduce((a: number, b: number) => a + b, 0) / g.sleeps.length,
+        entry_count: g.count,
+      }))
+      .sort((a, b) => {
+        const aIndex = timeOrder.indexOf(a.time_of_day);
+        const bIndex = timeOrder.indexOf(b.time_of_day);
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+      });
+  }
+
+  private getWeekNumber(date: Date): number {
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNum = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+  }
+
   async getEmotionAnalytics(days: number = 30): Promise<any[]> {
     if (!this.db) await this.init();
     
