@@ -1,0 +1,31 @@
+
+CREATE TABLE mood_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  mood_level INTEGER,
+  anxiety_level INTEGER,
+  energy_level INTEGER,
+  sleep_quality INTEGER,
+  notes TEXT,
+  entry_date DATE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE medications (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  dosage TEXT,
+  frequency TEXT,
+  is_active BOOLEAN DEFAULT 1,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE medication_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  medication_id INTEGER,
+  taken_at TIMESTAMP,
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
