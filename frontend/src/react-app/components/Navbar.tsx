@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { Brain, BarChart3, Pill, Home, Heart } from "lucide-react";
+import { Brain, BarChart3, Pill, Home, Heart, Database } from "lucide-react";
 
 export default function Navbar() {
   const location = useLocation();
@@ -12,6 +12,7 @@ export default function Navbar() {
     { path: "/analytics", icon: BarChart3, label: "Analytics" },
     { path: "/emotions", icon: Heart, label: "Emotions" },
     { path: "/medications", icon: Pill, label: "Medications" },
+    { path: "/data", icon: Database, label: "Data" },
   ];
   
   return (
