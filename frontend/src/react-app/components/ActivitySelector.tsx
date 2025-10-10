@@ -2,14 +2,6 @@ import { useState } from 'react';
 import { Activity, Dumbbell, Heart } from 'lucide-react';
 import { useActivities } from '@/react-app/hooks/useActivities';
 
-interface ActivityOption {
-  id: number;
-  name: string;
-  icon: string;
-  color: string;
-  category: string;
-}
-
 interface ActivitySelectorProps {
   selectedActivities: number[];
   onChange: (activities: number[]) => void;
