@@ -485,6 +485,27 @@ class MindwellDB {
     });
   }
 
+  // Activities CRUD
+  async getAllActivities(): Promise<any[]> {
+    if (!this.db) await this.init();
+    
+    return new Promise((resolve, reject) => {
+      const tx = this.db!.transaction('activities', 'readonly');
+      const store = tx.objectStore('activities');
+      const request = store.getAll();
+      
+      request.onsuccess = () => {
+        const activities = request.result.sort((a, b) => {
+          const catCompare = a.category.localeCompare(b.category);
+          if (catCompare !== 0) return catCompare;
+          return a.name.localeCompare(b.name);
+        });
+        resolve(activities);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   // Export all data
   async exportAllData(): Promise<string> {
     if (!this.db) await this.init();
