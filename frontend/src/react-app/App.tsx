@@ -4,6 +4,7 @@ import TrackingPage from "@/react-app/pages/Tracking";
 import AnalyticsPage from "@/react-app/pages/Analytics";
 import EmotionAnalyticsPage from "@/react-app/pages/EmotionAnalytics";
 import MedicationsPage from "@/react-app/pages/Medications";
+import DataManagementPage from "@/react-app/pages/DataManagement";
 import Navbar from "@/react-app/components/Navbar";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/emotions" element={<EmotionAnalyticsPage />} />
             <Route path="/medications" element={<MedicationsPage />} />
+            <Route path="/data" element={<DataManagementPage />} />
           </Routes>
         </main>
       </div>
