@@ -256,11 +256,11 @@ class MindwellDB {
       const request = meeStore.add(entry);
       
       request.onsuccess = async () => {
-        const emotion = await new Promise((res) => {
+        const emotion = await new Promise<any>((res) => {
           const req = emotionStore.get(entry.emotion_id);
           req.onsuccess = () => res(req.result);
         });
-        resolve({ ...entry, id: request.result, ...emotion });
+        resolve({ ...entry, id: request.result, ...(emotion || {}) });
       };
       request.onerror = () => reject(request.error);
     });
