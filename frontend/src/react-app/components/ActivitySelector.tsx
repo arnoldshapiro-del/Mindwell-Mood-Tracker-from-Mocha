@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Activity, Dumbbell, Heart } from 'lucide-react';
+import { useActivities } from '@/react-app/hooks/useActivities';
 
 interface ActivityOption {
   id: number;
@@ -15,27 +16,8 @@ interface ActivitySelectorProps {
 }
 
 export default function ActivitySelector({ selectedActivities, onChange }: ActivitySelectorProps) {
-  const [activities, setActivities] = useState<ActivityOption[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { activities, loading } = useActivities();
   const [activeCategory, setActiveCategory] = useState<string>('all');
-
-  useEffect(() => {
-    const fetchActivities = async () => {
-      try {
-        const response = await fetch('/api/activities');
-        if (response.ok) {
-          const data = await response.json();
-          setActivities(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch activities:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchActivities();
-  }, []);
 
   const categories = [
     { id: 'all', name: 'All', icon: Activity },
