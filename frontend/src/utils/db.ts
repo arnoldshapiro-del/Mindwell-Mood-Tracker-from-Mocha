@@ -92,7 +92,10 @@ class MindwellDB {
       }
     }
 
-    return tx.complete;
+    return new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
   }
 
   // Mood Entries CRUD
