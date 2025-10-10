@@ -5,6 +5,7 @@ import EmotionSelector from '@/react-app/components/EmotionSelector';
 import TimeOfDaySelector from '@/react-app/components/TimeOfDaySelector';
 import ActivitySelector from '@/react-app/components/ActivitySelector';
 import { useMoodEntries } from '@/react-app/hooks/useMoodEntries';
+import { db } from '@/utils/db';
 
 export default function Tracking() {
   const { createEntry } = useMoodEntries();
