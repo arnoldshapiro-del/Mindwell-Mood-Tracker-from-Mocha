@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Pill, Plus, Clock, Check } from 'lucide-react';
-import { Medication, CreateMedicationSchema } from '@/shared/types';
+import { CreateMedicationSchema } from '@/shared/types';
+import { useMedications } from '@/react-app/hooks/useMedications';
 
 export default function Medications() {
-  const [medications, setMedications] = useState<Medication[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { medications, loading, createMedication, createLog } = useMedications();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMedication, setNewMedication] = useState({
     name: '',
@@ -12,35 +12,15 @@ export default function Medications() {
     frequency: '',
   });
 
-  const fetchMedications = async () => {
-    try {
-      const response = await fetch('/api/medications');
-      if (response.ok) {
-        const data = await response.json();
-        setMedications(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch medications:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const addMedication = async () => {
     try {
-      const validatedData = CreateMedicationSchema.parse(newMedication);
-      const response = await fetch('/api/medications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(validatedData),
+      const validatedData = CreateMedicationSchema.parse({
+        ...newMedication,
+        is_active: true,
       });
-      
-      if (response.ok) {
-        const medication = await response.json();
-        setMedications(prev => [...prev, medication]);
-        setNewMedication({ name: '', dosage: '', frequency: '' });
-        setShowAddForm(false);
-      }
+      await createMedication(validatedData);
+      setNewMedication({ name: '', dosage: '', frequency: '' });
+      setShowAddForm(false);
     } catch (error) {
       console.error('Failed to add medication:', error);
     }
@@ -48,27 +28,15 @@ export default function Medications() {
 
   const logMedication = async (medicationId: number) => {
     try {
-      const response = await fetch('/api/medication-logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          medication_id: medicationId,
-          taken_at: new Date().toISOString(),
-        }),
+      await createLog({
+        medication_id: medicationId,
+        taken_at: new Date().toISOString(),
       });
-      
-      if (response.ok) {
-        // Show success feedback (could implement a toast system)
-        console.log('Medication logged successfully');
-      }
+      console.log('Medication logged successfully');
     } catch (error) {
       console.error('Failed to log medication:', error);
     }
   };
-
-  useEffect(() => {
-    fetchMedications();
-  }, []);
 
   if (loading) {
     return (
