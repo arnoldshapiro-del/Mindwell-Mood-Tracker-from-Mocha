@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Heart, TrendingUp, Activity, AlertCircle } from 'lucide-react';
+import { db } from '@/utils/db';
 
 interface EmotionTrend {
   name: string;
@@ -19,9 +20,7 @@ export default function EmotionAnalytics() {
     const fetchEmotionAnalytics = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/analytics/emotions');
-        if (!response.ok) throw new Error('Failed to fetch emotion analytics');
-        const data = await response.json();
+        const data = await db.getEmotionAnalytics(30);
         setEmotionTrends(data);
         setError(null);
       } catch (err) {
