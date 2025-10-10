@@ -226,11 +226,11 @@ class MindwellDB {
         const entries = request.result;
         const withDetails = await Promise.all(
           entries.map(async (entry) => {
-            const emotion = await new Promise((res) => {
+            const emotion = await new Promise<any>((res) => {
               const req = emotionStore.get(entry.emotion_id);
               req.onsuccess = () => res(req.result);
             });
-            return { ...entry, ...emotion };
+            return { ...entry, ...(emotion || {}) };
           })
         );
         resolve(withDetails);
