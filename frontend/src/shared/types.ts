@@ -8,6 +8,7 @@ export const MoodEntrySchema = z.object({
   sleep_quality: z.number().min(1).max(4),
   notes: z.string().optional(),
   entry_date: z.string(),
+  time_of_day: z.string().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
 });
