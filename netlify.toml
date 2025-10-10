@@ -1,6 +1,6 @@
 [build]
-  base = "frontend"
-  publish = "frontend/dist"
+  base = "Mindwell-Mood-Tracker-from-Mocha-main"
+  publish = "Mindwell-Mood-Tracker-from-Mocha-main/dist"
   command = "npm run build"
 
 [[redirects]]
