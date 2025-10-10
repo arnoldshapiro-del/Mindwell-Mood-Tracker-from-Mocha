@@ -11,6 +11,12 @@ interface EmotionTrend {
   frequency: number;
 }
 
+interface CategoryData {
+  category: string;
+  count: number;
+  color: string;
+}
+
 export default function EmotionAnalytics() {
   const [emotionTrends, setEmotionTrends] = useState<EmotionTrend[]>([]);
   const [loading, setLoading] = useState(true);
