@@ -579,5 +579,8 @@ class MindwellDB {
 
 export const db = new MindwellDB();
 
-// Initialize DB and seed emotions on module load
-db.init().then(() => db.seedEmotions());
+// Initialize DB and seed emotions and activities on module load
+db.init().then(() => {
+  db.seedEmotions();
+  db.seedActivities();
+});
