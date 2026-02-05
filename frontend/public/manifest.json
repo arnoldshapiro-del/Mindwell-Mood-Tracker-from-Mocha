@@ -1,0 +1,16 @@
+{
+  "name": "Mindwell Mood Tracker",
+  "short_name": "Mindwell",
+  "description": "Privacy-first mood tracking with clinical-grade analytics",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1225",
+  "theme_color": "#ec4899",
+  "orientation": "any",
+  "icons": [
+    {"src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "/icons/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable"}
+  ],
+  "categories": ["health", "lifestyle", "productivity"],
+  "prefer_related_applications": false
+}
